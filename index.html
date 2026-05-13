@@ -1,542 +1,322 @@
-```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="viewport"
+  content="width=device-width, initial-scale=1.0">
 
   <title>Telecom Manager</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
 
   <!-- ICONOS -->
   <link rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-  <style>
+  <!-- JSPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:Arial, Helvetica, sans-serif;
-    }
+  <!-- AUTOTABLE -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
-    body{
-      background:#f5f7fb;
-      color:#222;
-    }
-
-    /* =========================
-       NAVBAR
-    ========================== */
-
-    .navbar{
-      width:100%;
-      height:80px;
-      background:white;
-      box-shadow:0 2px 10px rgba(0,0,0,.08);
-
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-
-      padding:0 8%;
-      position:sticky;
-      top:0;
-      z-index:100;
-    }
-
-    .logo{
-      font-size:28px;
-      font-weight:bold;
-      color:#1f4fa8;
-    }
-
-    .menu{
-      display:flex;
-      gap:30px;
-    }
-
-    .menu a{
-      text-decoration:none;
-      color:#555;
-      font-weight:600;
-      transition:.3s;
-    }
-
-    .menu a:hover{
-      color:#1f4fa8;
-    }
-
-    .profile{
-      width:45px;
-      height:45px;
-      border-radius:50%;
-      background:#dbe9ff;
-
-      display:flex;
-      justify-content:center;
-      align-items:center;
-
-      color:#1f4fa8;
-      font-size:20px;
-      cursor:pointer;
-    }
-
-    /* =========================
-       HERO
-    ========================== */
-
-    .hero{
-      width:100%;
-      min-height:300px;
-
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-
-      padding:60px 8%;
-      background:linear-gradient(
-        135deg,
-        #1f4fa8,
-        #5d9eff
-      );
-
-      color:white;
-    }
-
-    .hero-text{
-      width:55%;
-    }
-
-    .hero-text h1{
-      font-size:55px;
-      margin-bottom:20px;
-    }
-
-    .hero-text p{
-      font-size:20px;
-      line-height:1.6;
-      opacity:.9;
-    }
-
-    .hero button{
-      margin-top:30px;
-      padding:15px 30px;
-      border:none;
-      border-radius:12px;
-      background:white;
-      color:#1f4fa8;
-      font-size:17px;
-      font-weight:bold;
-      cursor:pointer;
-      transition:.3s;
-    }
-
-    .hero button:hover{
-      transform:translateY(-3px);
-    }
-
-    .hero-icon{
-      font-size:180px;
-      opacity:.2;
-    }
-
-    /* =========================
-       DASHBOARD
-    ========================== */
-
-    .dashboard{
-      padding:60px 8%;
-    }
-
-    .section-title{
-      margin-bottom:30px;
-      font-size:35px;
-      color:#1f1f1f;
-    }
-
-    .cards{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-      gap:25px;
-    }
-
-    .card{
-      background:white;
-      padding:30px;
-      border-radius:20px;
-      box-shadow:0 5px 15px rgba(0,0,0,.06);
-      transition:.3s;
-    }
-
-    .card:hover{
-      transform:translateY(-5px);
-    }
-
-    .card i{
-      font-size:35px;
-      margin-bottom:20px;
-    }
-
-    .blue{color:#2196f3;}
-    .green{color:#4caf50;}
-    .orange{color:#ff9800;}
-    .purple{color:#9c27b0;}
-
-    .card h2{
-      font-size:45px;
-      margin-bottom:10px;
-    }
-
-    .card p{
-      color:#777;
-      font-size:18px;
-    }
-
-    /* =========================
-       INGRESOS
-    ========================== */
-
-    .income{
-      margin-top:40px;
-
-      background:linear-gradient(
-        135deg,
-        #dbeeff,
-        #b7d7ff
-      );
-
-      border-radius:25px;
-      padding:40px;
-
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
-
-    .income h3{
-      color:#3569b5;
-      margin-bottom:15px;
-      font-size:25px;
-    }
-
-    .income h1{
-      font-size:60px;
-      color:#1f4fa8;
-    }
-
-    .income i{
-      font-size:90px;
-      color:#5fa7ff;
-    }
-
-    /* =========================
-       SERVICIOS
-    ========================== */
-
-    .services{
-      margin-top:70px;
-    }
-
-    .services-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:25px;
-    }
-
-    .services-header h2{
-      font-size:35px;
-    }
-
-    .services-header button{
-      padding:12px 20px;
-      border:none;
-      border-radius:10px;
-      background:#1f4fa8;
-      color:white;
-      cursor:pointer;
-      font-weight:bold;
-    }
-
-    .service-list{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-      gap:20px;
-    }
-
-    .service{
-      background:white;
-      border-radius:20px;
-      padding:25px;
-      box-shadow:0 5px 15px rgba(0,0,0,.06);
-    }
-
-    .service h3{
-      margin-bottom:10px;
-      color:#222;
-    }
-
-    .status{
-      display:inline-block;
-      margin-top:10px;
-      padding:8px 14px;
-      border-radius:20px;
-      font-size:14px;
-      font-weight:bold;
-    }
-
-    .completed{
-      background:#d8f5df;
-      color:#2e7d32;
-    }
-
-    .pending{
-      background:#fff0d5;
-      color:#ef6c00;
-    }
-
-    .process{
-      background:#eadcff;
-      color:#7b1fa2;
-    }
-
-    /* =========================
-       FOOTER
-    ========================== */
-
-    footer{
-      margin-top:80px;
-      background:#111827;
-      color:white;
-      padding:40px 8%;
-      text-align:center;
-    }
-
-    footer p{
-      opacity:.8;
-    }
-
-    /* =========================
-       RESPONSIVE
-    ========================== */
-
-    @media(max-width:900px){
-
-      .hero{
-        flex-direction:column;
-        text-align:center;
-        gap:30px;
-      }
-
-      .hero-text{
-        width:100%;
-      }
-
-      .hero-text h1{
-        font-size:42px;
-      }
-
-      .hero-icon{
-        font-size:120px;
-      }
-
-      .income{
-        flex-direction:column;
-        text-align:center;
-        gap:20px;
-      }
-
-      .menu{
-        display:none;
-      }
-
-    }
-
-  </style>
 </head>
+
 <body>
 
-  <!-- NAVBAR -->
-  <nav class="navbar">
+  <!-- HEADER -->
+  <header class="header">
 
     <div class="logo">
-      Telecom Manager
+
+      <i class="fa-solid fa-tower-cell"></i>
+
+      <span>
+        Telecom Manager
+      </span>
+
     </div>
 
-    <div class="menu">
-      <a href="#">Inicio</a>
-      <a href="#">Servicios</a>
-      <a href="#">Reportes</a>
-      <a href="#">Clientes</a>
-      <a href="#">Contacto</a>
+    <div class="header-info">
+
+      Sistema de Gestión de Servicios
+
     </div>
 
-    <div class="profile">
-      <i class="fa-solid fa-user"></i>
-    </div>
+  </header>
 
-  </nav>
+  <!-- CONTENIDO -->
+  <main class="container">
 
-  <!-- HERO -->
-  <section class="hero">
+    <!-- TITULO -->
+    <section class="title-section">
 
-    <div class="hero-text">
-      <h1>Gestiona tus servicios de telecomunicaciones</h1>
+      <h1>
+        Registro de Servicio Técnico
+      </h1>
 
       <p>
-        Administra instalaciones, clientes, ingresos y reportes
-        desde una plataforma moderna y profesional.
+        Completa el formulario para registrar
+        instalaciones y mantenimientos.
       </p>
 
-      <button onclick="showMessage()">
-        Empezar Ahora
-      </button>
-    </div>
+    </section>
 
-    <div class="hero-icon">
-      <i class="fa-solid fa-tower-cell"></i>
-    </div>
+    <!-- FORMULARIO -->
+    <section class="form-section">
 
-  </section>
+      <form id="serviceForm">
 
-  <!-- DASHBOARD -->
-  <section class="dashboard">
+        <div class="grid">
 
-    <h2 class="section-title">
-      Panel General
-    </h2>
+          <!-- CLIENTE -->
+          <div class="input-group">
 
-    <div class="cards">
+            <label>
+              Nombre del Cliente
+            </label>
 
-      <div class="card">
-        <i class="fa-solid fa-clipboard blue"></i>
-        <h2 id="total">25</h2>
-        <p>Servicios Totales</p>
-      </div>
+            <input
+            type="text"
+            id="clientName"
+            required>
 
-      <div class="card">
-        <i class="fa-solid fa-circle-check green"></i>
-        <h2 id="completed">18</h2>
-        <p>Completados</p>
-      </div>
+          </div>
 
-      <div class="card">
-        <i class="fa-solid fa-clock orange"></i>
-        <h2 id="pending">4</h2>
-        <p>Pendientes</p>
-      </div>
+          <!-- DIRECCION -->
+          <div class="input-group">
 
-      <div class="card">
-        <i class="fa-solid fa-spinner purple"></i>
-        <h2 id="process">3</h2>
-        <p>En Proceso</p>
-      </div>
+            <label>
+              Dirección
+            </label>
 
-    </div>
+            <input
+            type="text"
+            id="address"
+            required>
 
-    <!-- INGRESOS -->
-    <div class="income">
+          </div>
 
-      <div>
-        <h3>Ingresos Totales</h3>
-        <h1 id="income">$12,500</h1>
-      </div>
+          <!-- FECHA -->
+          <div class="input-group">
 
-      <i class="fa-solid fa-dollar-sign"></i>
+            <label>
+              Fecha
+            </label>
 
-    </div>
+            <input
+            type="date"
+            id="date"
+            required>
 
-    <!-- SERVICIOS -->
-    <div class="services">
+          </div>
 
-      <div class="services-header">
-        <h2>Servicios Recientes</h2>
+          <!-- TICKET -->
+          <div class="input-group">
 
-        <button onclick="addService()">
-          + Nuevo Servicio
-        </button>
-      </div>
+            <label>
+              Número / Ticket
+            </label>
 
-      <div class="service-list" id="serviceList">
+            <input
+            type="text"
+            id="ticket"
+            required>
 
-        <div class="service">
-          <h3>Instalación Fibra Óptica</h3>
-          <p>Cliente: Carlos Pérez</p>
-          <span class="status completed">
-            Completado
-          </span>
+          </div>
+
+          <!-- HORA ENTRADA -->
+          <div class="input-group">
+
+            <label>
+              Hora Entrada
+            </label>
+
+            <input
+            type="time"
+            id="entryTime"
+            required>
+
+          </div>
+
+          <!-- HORA SALIDA -->
+          <div class="input-group">
+
+            <label>
+              Hora Salida
+            </label>
+
+            <input
+            type="time"
+            id="exitTime"
+            required>
+
+          </div>
+
+          <!-- TIPO -->
+          <div class="input-group full-width">
+
+            <label>
+              Tipo de Servicio
+            </label>
+
+            <select
+            id="serviceType"
+            required>
+
+              <option value="">
+                Selecciona
+              </option>
+
+              <option value="Instalación">
+                Instalación
+              </option>
+
+              <option value="Mantenimiento">
+                Mantenimiento
+              </option>
+
+            </select>
+
+          </div>
+
+          <!-- DESCRIPCION -->
+          <div class="input-group full-width">
+
+            <label>
+              Descripción
+            </label>
+
+            <textarea
+            id="description"
+            rows="6"
+            required></textarea>
+
+          </div>
+
         </div>
 
-        <div class="service">
-          <h3>Mantenimiento de Red</h3>
-          <p>Cliente: Ana Torres</p>
-          <span class="status pending">
-            Pendiente
-          </span>
+        <!-- FIRMAS -->
+        <section class="signature-section">
+
+          <!-- CLIENTE -->
+          <div class="signature-box">
+
+            <label>
+              Firma Cliente
+            </label>
+
+            <canvas
+            id="clientSignature"
+            width="400"
+            height="200"></canvas>
+
+            <button
+            type="button"
+            class="clear-btn"
+            onclick="clearCanvas('clientSignature')">
+
+              Limpiar Firma
+
+            </button>
+
+          </div>
+
+          <!-- TECNICO -->
+          <div class="signature-box">
+
+            <label>
+              Firma Prestador
+            </label>
+
+            <canvas
+            id="providerSignature"
+            width="400"
+            height="200"></canvas>
+
+            <button
+            type="button"
+            class="clear-btn"
+            onclick="clearCanvas('providerSignature')">
+
+              Limpiar Firma
+
+            </button>
+
+          </div>
+
+        </section>
+
+        <!-- BOTONES -->
+        <div class="buttons">
+
+          <button
+          type="submit"
+          class="save-btn">
+
+            Guardar Servicio
+
+          </button>
+
+          <button
+          type="button"
+          class="pdf-btn"
+          onclick="generatePDF()">
+
+            Generar PDF
+
+          </button>
+
         </div>
 
-        <div class="service">
-          <h3>Configuración Router</h3>
-          <p>Cliente: Juan López</p>
-          <span class="status process">
-            En Proceso
-          </span>
-        </div>
+      </form>
+
+    </section>
+
+    <!-- TABLA -->
+    <section class="table-section">
+
+      <h2>
+        Servicios Registrados
+      </h2>
+
+      <div class="table-container">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>Cliente</th>
+              <th>Dirección</th>
+              <th>Fecha</th>
+              <th>Tipo</th>
+              <th>Ticket</th>
+              <th>Entrada</th>
+              <th>Salida</th>
+              <th>Acciones</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="tableBody">
+
+          </tbody>
+
+        </table>
 
       </div>
 
-    </div>
+    </section>
 
-  </section>
+  </main>
 
-  <!-- FOOTER -->
-  <footer>
-    <h2>Telecom Manager</h2>
-    <br>
-    <p>
-      Plataforma moderna para gestión de servicios de telecomunicaciones.
-    </p>
-  </footer>
-
-  <!-- JAVASCRIPT -->
-  <script>
-
-    function showMessage(){
-      alert("Bienvenido a Telecom Manager 🚀");
-    }
-
-    function addService(){
-
-      const serviceList =
-      document.getElementById("serviceList");
-
-      const newService =
-      document.createElement("div");
-
-      newService.classList.add("service");
-
-      newService.innerHTML = `
-        <h3>Nuevo Servicio de Internet</h3>
-        <p>Cliente: Nuevo Cliente</p>
-        <span class="status pending">
-          Pendiente
-        </span>
-      `;
-
-      serviceList.appendChild(newService);
-
-      // ACTUALIZAR CONTADOR
-      let total =
-      document.getElementById("total");
-
-      total.textContent =
-      parseInt(total.textContent) + 1;
-
-    }
-
-  </script>
+  <!-- JS -->
+  <script src="app.js"></script>
 
 </body>
 </html>
-```
