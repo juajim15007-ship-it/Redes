@@ -261,17 +261,7 @@ let currentTargetCanvas = null;
 let drawing = false;
 
 // =======================================
-// CONFIGURACION DIBUJO
-// =======================================
-
-modalCtx.lineWidth = 3;
-
-modalCtx.lineCap = "round";
-
-modalCtx.strokeStyle = "#000";
-
-// =======================================
-// AJUSTAR CALIDAD CANVAS
+// AJUSTAR CANVAS
 // =======================================
 
 function resizeModalCanvas(){
@@ -279,17 +269,39 @@ function resizeModalCanvas(){
   const ratio =
   window.devicePixelRatio || 1;
 
+  const rect =
+  modalCanvas.getBoundingClientRect();
+
   modalCanvas.width =
-  modalCanvas.offsetWidth * ratio;
+  rect.width * ratio;
 
   modalCanvas.height =
-  modalCanvas.offsetHeight * ratio;
+  rect.height * ratio;
 
-  modalCtx.scale(ratio, ratio);
+  modalCtx.setTransform(
+    ratio,
+    0,
+    0,
+    ratio,
+    0,
+    0
+  );
+
+  // ESTILOS
+  modalCtx.lineWidth = 3;
+
+  modalCtx.lineCap = "round";
+
+  modalCtx.strokeStyle = "#000";
 
 }
 
 resizeModalCanvas();
+
+window.addEventListener(
+  "resize",
+  resizeModalCanvas
+);
 
 // =======================================
 // ABRIR MODAL
@@ -304,7 +316,11 @@ function openSignatureModal(targetId){
     "active"
   );
 
-  clearModalSignature();
+  setTimeout(()=>{
+
+    resizeModalCanvas();
+
+  },100);
 
 }
 
@@ -321,7 +337,7 @@ function closeSignatureModal(){
 }
 
 // =======================================
-// LIMPIAR FIRMA MODAL
+// LIMPIAR FIRMA
 // =======================================
 
 function clearModalSignature(){
@@ -344,6 +360,7 @@ function saveSignature(){
   const targetCtx =
   currentTargetCanvas.getContext("2d");
 
+  // LIMPIAR
   targetCtx.clearRect(
     0,
     0,
@@ -351,6 +368,7 @@ function saveSignature(){
     currentTargetCanvas.height
   );
 
+  // DIBUJAR
   targetCtx.drawImage(
     modalCanvas,
     0,
@@ -364,42 +382,45 @@ function saveSignature(){
 }
 
 // =======================================
-// OBTENER POSICION
+// POSICION
 // =======================================
 
-function getPos(e){
+function getPosition(e){
 
   const rect =
   modalCanvas.getBoundingClientRect();
 
-  if(e.touches){
+  let x;
+  let y;
 
-    return {
+  // TOUCH
+  if(e.touches && e.touches.length > 0){
 
-      x:
-      e.touches[0].clientX - rect.left,
+    x =
+    e.touches[0].clientX - rect.left;
 
-      y:
-      e.touches[0].clientY - rect.top
-
-    };
+    y =
+    e.touches[0].clientY - rect.top;
 
   }
 
-  return {
+  // MOUSE
+  else{
 
-    x:
-    e.clientX - rect.left,
+    x =
+    e.clientX - rect.left;
 
-    y:
-    e.clientY - rect.top
+    y =
+    e.clientY - rect.top;
 
-  };
+  }
+
+  return { x, y };
 
 }
 
 // =======================================
-// INICIAR DIBUJO
+// INICIAR
 // =======================================
 
 function startDraw(e){
@@ -407,7 +428,7 @@ function startDraw(e){
   drawing = true;
 
   const pos =
-  getPos(e);
+  getPosition(e);
 
   modalCtx.beginPath();
 
@@ -429,7 +450,7 @@ function draw(e){
   if(!drawing) return;
 
   const pos =
-  getPos(e);
+  getPosition(e);
 
   modalCtx.lineTo(
     pos.x,
@@ -455,7 +476,7 @@ function stopDraw(){
 }
 
 // =======================================
-// EVENTOS PC
+// EVENTOS MOUSE
 // =======================================
 
 modalCanvas.addEventListener(
@@ -479,7 +500,7 @@ modalCanvas.addEventListener(
 );
 
 // =======================================
-// EVENTOS MOVIL
+// EVENTOS TOUCH
 // =======================================
 
 modalCanvas.addEventListener(
@@ -496,6 +517,11 @@ modalCanvas.addEventListener(
 
 modalCanvas.addEventListener(
   "touchend",
+  stopDraw
+);
+
+modalCanvas.addEventListener(
+  "touchcancel",
   stopDraw
 );
 

@@ -531,6 +531,8 @@ tbody td{
 
   touch-action:none;
 
+  cursor:crosshair;
+
 }
 
 /* PREVIEW */
