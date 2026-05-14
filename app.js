@@ -638,3 +638,215 @@ function generatePDF(){
   doc.save(fileName);
 
 }
+// =======================================
+// MODAL FIRMA DIGITAL
+// =======================================
+
+const signatureModal =
+document.getElementById(
+  "signatureModal"
+);
+
+const modalCanvas =
+document.getElementById(
+  "modalCanvas"
+);
+
+const modalCtx =
+modalCanvas.getContext("2d");
+
+let currentTargetCanvas = null;
+
+let drawing = false;
+
+// AJUSTAR CANVAS
+function resizeModalCanvas(){
+
+  modalCanvas.width =
+  modalCanvas.offsetWidth;
+
+  modalCanvas.height =
+  modalCanvas.offsetHeight;
+
+}
+
+resizeModalCanvas();
+
+// ABRIR MODAL
+function openSignatureModal(targetId){
+
+  currentTargetCanvas =
+  document.getElementById(targetId);
+
+  signatureModal.classList.add(
+    "active"
+  );
+
+  clearModalSignature();
+
+}
+
+// CERRAR MODAL
+function closeSignatureModal(){
+
+  signatureModal.classList.remove(
+    "active"
+  );
+
+}
+
+// LIMPIAR
+function clearModalSignature(){
+
+  modalCtx.clearRect(
+    0,
+    0,
+    modalCanvas.width,
+    modalCanvas.height
+  );
+
+}
+
+// GUARDAR FIRMA
+function saveSignature(){
+
+  const targetCtx =
+  currentTargetCanvas.getContext("2d");
+
+  targetCtx.clearRect(
+    0,
+    0,
+    currentTargetCanvas.width,
+    currentTargetCanvas.height
+  );
+
+  targetCtx.drawImage(
+    modalCanvas,
+    0,
+    0,
+    currentTargetCanvas.width,
+    currentTargetCanvas.height
+  );
+
+  closeSignatureModal();
+
+}
+
+// =======================================
+// DIBUJO TOUCH + PC
+// =======================================
+
+function getPos(e){
+
+  const rect =
+  modalCanvas.getBoundingClientRect();
+
+  if(e.touches){
+
+    return {
+
+      x:
+      e.touches[0].clientX - rect.left,
+
+      y:
+      e.touches[0].clientY - rect.top
+
+    };
+
+  }
+
+  return {
+
+    x:
+    e.clientX - rect.left,
+
+    y:
+    e.clientY - rect.top
+
+  };
+
+}
+
+// INICIAR
+function startDraw(e){
+
+  drawing = true;
+
+  const pos = getPos(e);
+
+  modalCtx.beginPath();
+
+  modalCtx.moveTo(pos.x, pos.y);
+
+  e.preventDefault();
+
+}
+
+// DIBUJAR
+function draw(e){
+
+  if(!drawing) return;
+
+  const pos = getPos(e);
+
+  modalCtx.lineWidth = 3;
+
+  modalCtx.lineCap = "round";
+
+  modalCtx.strokeStyle = "#000";
+
+  modalCtx.lineTo(pos.x, pos.y);
+
+  modalCtx.stroke();
+
+  e.preventDefault();
+
+}
+
+// FINALIZAR
+function stopDraw(){
+
+  drawing = false;
+
+  modalCtx.beginPath();
+
+}
+
+// EVENTOS PC
+modalCanvas.addEventListener(
+  "mousedown",
+  startDraw
+);
+
+modalCanvas.addEventListener(
+  "mousemove",
+  draw
+);
+
+modalCanvas.addEventListener(
+  "mouseup",
+  stopDraw
+);
+
+modalCanvas.addEventListener(
+  "mouseleave",
+  stopDraw
+);
+
+// EVENTOS MOVIL
+modalCanvas.addEventListener(
+  "touchstart",
+  startDraw,
+  { passive:false }
+);
+
+modalCanvas.addEventListener(
+  "touchmove",
+  draw,
+  { passive:false }
+);
+
+modalCanvas.addEventListener(
+  "touchend",
+  stopDraw
+);

@@ -210,10 +210,11 @@
               Firma Cliente
             </label>
 
-            <canvas
-            id="clientSignature"
-            width="400"
-            height="200"></canvas>
+           <canvas
+              id="clientSignature"
+              class="signature-preview"
+              onclick="openSignatureModal('clientSignature')">
+            </canvas>
 
             <button
             type="button"
@@ -234,9 +235,10 @@
             </label>
 
             <canvas
-            id="providerSignature"
-            width="400"
-            height="200"></canvas>
+              id="providerSignature"
+              class="signature-preview"
+              onclick="openSignatureModal('providerSignature')">
+            </canvas>
 
             <button
             type="button"
@@ -316,6 +318,63 @@
     </section>
 
   </main>
+  <!-- =======================================
+     MODAL FIRMA DIGITAL
+======================================= -->
+
+<div
+id="signatureModal"
+class="signature-modal">
+
+  <div class="signature-modal-content">
+
+    <h2>
+      Firma Digital
+    </h2>
+
+    <p>
+      Firma con tu dedo o lápiz táctil
+    </p>
+
+    <!-- CANVAS GRANDE -->
+    <canvas
+    id="modalCanvas"></canvas>
+
+    <!-- BOTONES -->
+    <div class="modal-buttons">
+
+      <button
+      type="button"
+      class="clear-signature-btn"
+      onclick="clearModalSignature()">
+
+        Limpiar
+
+      </button>
+
+      <button
+      type="button"
+      class="save-signature-btn"
+      onclick="saveSignature()">
+
+        Guardar Firma
+
+      </button>
+
+      <button
+      type="button"
+      class="close-signature-btn"
+      onclick="closeSignatureModal()">
+
+        Cancelar
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
 
   <!-- JS -->
   <script src="app.js"></script>

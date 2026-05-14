@@ -450,3 +450,197 @@ tbody td{
   transform:translateY(-2px);
 
 }
+
+/* =======================================
+   MODAL FIRMA
+======================================= */
+
+.signature-modal{
+
+  position:fixed;
+
+  inset:0;
+
+  background:rgba(0,0,0,.7);
+
+  display:none;
+
+  justify-content:center;
+
+  align-items:center;
+
+  z-index:9999;
+
+  padding:20px;
+
+}
+
+.signature-modal.active{
+
+  display:flex;
+
+}
+
+.signature-modal-content{
+
+  width:100%;
+
+  max-width:900px;
+
+  background:white;
+
+  border-radius:25px;
+
+  padding:30px;
+
+  text-align:center;
+
+  animation:fadeIn .3s ease;
+
+}
+
+.signature-modal-content h2{
+
+  color:#1f4fa8;
+
+  margin-bottom:10px;
+
+}
+
+.signature-modal-content p{
+
+  color:#666;
+
+  margin-bottom:20px;
+
+}
+
+/* CANVAS GRANDE */
+
+#modalCanvas{
+
+  width:100%;
+
+  height:450px;
+
+  background:white;
+
+  border:3px dashed #1f4fa8;
+
+  border-radius:20px;
+
+  touch-action:none;
+
+}
+
+/* PREVIEW */
+
+.signature-preview{
+
+  width:100%;
+
+  height:220px;
+
+  background:white;
+
+  border:2px dashed #1f4fa8;
+
+  border-radius:15px;
+
+  cursor:pointer;
+
+}
+
+/* BOTONES */
+
+.modal-buttons{
+
+  margin-top:25px;
+
+  display:flex;
+
+  justify-content:center;
+
+  gap:15px;
+
+  flex-wrap:wrap;
+
+}
+
+.clear-signature-btn,
+.save-signature-btn,
+.close-signature-btn{
+
+  border:none;
+
+  padding:14px 24px;
+
+  border-radius:12px;
+
+  color:white;
+
+  cursor:pointer;
+
+  font-weight:bold;
+
+  transition:.3s;
+
+}
+
+.clear-signature-btn{
+
+  background:#ff9800;
+
+}
+
+.save-signature-btn{
+
+  background:#1f4fa8;
+
+}
+
+.close-signature-btn{
+
+  background:#e53935;
+
+}
+
+.clear-signature-btn:hover,
+.save-signature-btn:hover,
+.close-signature-btn:hover{
+
+  transform:translateY(-2px);
+
+}
+
+/* ANIMACION */
+
+@keyframes fadeIn{
+
+  from{
+
+    opacity:0;
+    transform:scale(.9);
+
+  }
+
+  to{
+
+    opacity:1;
+    transform:scale(1);
+
+  }
+
+}
+
+/* MOVIL */
+
+@media(max-width:768px){
+
+  #modalCanvas{
+
+    height:350px;
+
+  }
+
+}
