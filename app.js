@@ -215,7 +215,10 @@ function editService(index){
 // MOSTRAR TABLA
 renderTable();
 
-// FIRMAS
+// =======================================
+// FIRMA DIGITAL COMPATIBLE MOVIL + PC
+// =======================================
+
 function setupCanvas(canvasId){
 
   const canvas =
@@ -226,60 +229,158 @@ function setupCanvas(canvasId){
 
   let drawing = false;
 
-  canvas.addEventListener(
-  "mousedown",
-  ()=>{
-    drawing = true;
-  });
+  // AJUSTAR RESOLUCION
+  function resizeCanvas(){
 
-  canvas.addEventListener(
-  "mouseup",
-  ()=>{
-    drawing = false;
-    ctx.beginPath();
-  });
+    const ratio =
+    window.devicePixelRatio || 1;
 
-  canvas.addEventListener(
-  "mousemove",
-  draw
-  );
+    canvas.width =
+    canvas.offsetWidth * ratio;
 
-  function draw(e){
+    canvas.height =
+    canvas.offsetHeight * ratio;
 
-    if(!drawing) return;
+    ctx.scale(ratio, ratio);
+
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#000";
+
+  }
+
+  resizeCanvas();
+
+  // OBTENER POSICION
+  function getPosition(e){
 
     const rect =
     canvas.getBoundingClientRect();
 
-    ctx.lineWidth = 2;
+    // TOUCH
+    if(e.touches){
 
-    ctx.lineCap = "round";
+      return {
 
-    ctx.strokeStyle = "#000";
+        x:
+        e.touches[0].clientX - rect.left,
 
-    ctx.lineTo(
+        y:
+        e.touches[0].clientY - rect.top
+
+      };
+
+    }
+
+    // MOUSE
+    return {
+
+      x:
       e.clientX - rect.left,
+
+      y:
       e.clientY - rect.top
-    );
 
-    ctx.stroke();
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-      e.clientX - rect.left,
-      e.clientY - rect.top
-    );
+    };
 
   }
 
+  // INICIAR
+  function start(e){
+
+    drawing = true;
+
+    const pos =
+    getPosition(e);
+
+    ctx.beginPath();
+
+    ctx.moveTo(pos.x, pos.y);
+
+    e.preventDefault();
+
+  }
+
+  // DIBUJAR
+  function draw(e){
+
+    if(!drawing) return;
+
+    const pos =
+    getPosition(e);
+
+    ctx.lineTo(pos.x, pos.y);
+
+    ctx.stroke();
+
+    e.preventDefault();
+
+  }
+
+  // FINALIZAR
+  function stop(){
+
+    drawing = false;
+
+    ctx.beginPath();
+
+  }
+
+  // =======================================
+  // EVENTOS PC
+  // =======================================
+
+  canvas.addEventListener(
+    "mousedown",
+    start
+  );
+
+  canvas.addEventListener(
+    "mousemove",
+    draw
+  );
+
+  canvas.addEventListener(
+    "mouseup",
+    stop
+  );
+
+  canvas.addEventListener(
+    "mouseleave",
+    stop
+  );
+
+  // =======================================
+  // EVENTOS MOVIL
+  // =======================================
+
+  canvas.addEventListener(
+    "touchstart",
+    start,
+    { passive:false }
+  );
+
+  canvas.addEventListener(
+    "touchmove",
+    draw,
+    { passive:false }
+  );
+
+  canvas.addEventListener(
+    "touchend",
+    stop
+  );
+
 }
 
+// ACTIVAR FIRMAS
 setupCanvas("clientSignature");
-
 setupCanvas("providerSignature");
 
-// LIMPIAR CANVAS
+// =======================================
+// LIMPIAR FIRMA
+// =======================================
+
 function clearCanvas(canvasId){
 
   const canvas =
