@@ -1,19 +1,26 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
 
   <meta charset="UTF-8">
 
-  <meta name="viewport"
+  <meta
+  name="viewport"
   content="width=device-width, initial-scale=1.0">
 
-  <title>Gestion de servicios</title>
+  <title>
+    Gestión de Servicios
+  </title>
 
   <!-- CSS -->
-  <link rel="stylesheet" href="style.css">
+  <link
+  rel="stylesheet"
+  href="style.css">
 
   <!-- ICONOS -->
-  <link rel="stylesheet"
+  <link
+  rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <!-- JSPDF -->
@@ -26,7 +33,10 @@
 
 <body>
 
-  <!-- HEADER -->
+  <!-- =======================================
+       HEADER
+  ======================================== -->
+
   <header class="header">
 
     <div class="logo">
@@ -41,16 +51,20 @@
 
     <div class="header-info">
 
-      Sistema de Gestión de Servicios
+      Sistema de Gestión Técnica
 
     </div>
 
   </header>
 
-  <!-- CONTENIDO -->
+  <!-- =======================================
+       CONTENIDO PRINCIPAL
+  ======================================== -->
+
   <main class="container">
 
     <!-- TITULO -->
+
     <section class="title-section">
 
       <h1>
@@ -64,45 +78,55 @@
 
     </section>
 
-    <!-- FORMULARIO -->
+    <!-- =======================================
+         FORMULARIO
+    ======================================== -->
+
     <section class="form-section">
 
-      <form id="serviceForm">
+      <form
+      id="serviceForm"
+      autocomplete="off">
 
         <div class="grid">
 
           <!-- CLIENTE -->
+
           <div class="input-group">
 
-            <label>
+            <label for="clientName">
               Nombre del Cliente
             </label>
 
             <input
             type="text"
             id="clientName"
+            placeholder="Ej: Juan Pérez"
             required>
 
           </div>
 
           <!-- DIRECCION -->
+
           <div class="input-group">
 
-            <label>
+            <label for="address">
               Dirección
             </label>
 
             <input
             type="text"
             id="address"
+            placeholder="Ej: Calle 10 #25-40"
             required>
 
           </div>
 
           <!-- FECHA -->
+
           <div class="input-group">
 
-            <label>
+            <label for="date">
               Fecha
             </label>
 
@@ -114,25 +138,27 @@
           </div>
 
           <!-- TICKET -->
+
           <div class="input-group">
 
-            <label>
+            <label for="ticket">
               Número / Ticket
             </label>
 
             <input
-              type="number"
-              id="ticket"
-              placeholder="Ej: 1001"
-              min="1"
-              required>
+            type="number"
+            id="ticket"
+            placeholder="Ej: 1001"
+            min="1"
+            required>
 
           </div>
 
           <!-- HORA ENTRADA -->
+
           <div class="input-group">
 
-            <label>
+            <label for="entryTime">
               Hora Entrada
             </label>
 
@@ -144,9 +170,10 @@
           </div>
 
           <!-- HORA SALIDA -->
+
           <div class="input-group">
 
-            <label>
+            <label for="exitTime">
               Hora Salida
             </label>
 
@@ -157,10 +184,11 @@
 
           </div>
 
-          <!-- TIPO -->
+          <!-- TIPO SERVICIO -->
+
           <div class="input-group full-width">
 
-            <label>
+            <label for="serviceType">
               Tipo de Servicio
             </label>
 
@@ -169,7 +197,7 @@
             required>
 
               <option value="">
-                Selecciona
+                Selecciona una opción
               </option>
 
               <option value="Instalación">
@@ -185,49 +213,47 @@
           </div>
 
           <!-- DESCRIPCION -->
+
           <div class="input-group full-width">
 
-            <label>
-              Descripción
+            <label for="description">
+              Descripción del Trabajo Realizado
             </label>
 
             <textarea
             id="description"
             rows="6"
+            placeholder="Describe el trabajo realizado..."
             required></textarea>
 
           </div>
 
         </div>
 
-        <!-- FIRMAS -->
+        <!-- =======================================
+             FIRMAS
+        ======================================== -->
+
         <section class="signature-section">
 
-          <!-- CLIENTE -->
+          <!-- FIRMA CLIENTE -->
+
           <div class="signature-box">
 
             <label>
               Firma Cliente
             </label>
 
-           <canvas
-              id="clientSignature"
-              class="signature-preview"
-              onclick="openSignatureModal('clientSignature')">
+            <canvas
+            id="clientSignature"
+            class="signature-preview"
+            onclick="openSignatureModal('clientSignature')">
             </canvas>
-<!-- 
-            <button
-            type="button"
-            class="clear-btn"
-            onclick="clearCanvas('clientSignature')">
 
-              Limpiar Firma
-
-            </button>
- -->
           </div>
 
-          <!-- TECNICO -->
+          <!-- FIRMA TECNICO -->
+
           <div class="signature-box">
 
             <label>
@@ -235,30 +261,26 @@
             </label>
 
             <canvas
-              id="providerSignature"
-              class="signature-preview"
-              onclick="openSignatureModal('providerSignature')">
+            id="providerSignature"
+            class="signature-preview"
+            onclick="openSignatureModal('providerSignature')">
             </canvas>
-<!-- 
-            <button
-            type="button"
-            class="clear-btn"
-            onclick="clearCanvas('providerSignature')">
 
-              Limpiar Firma
-
-            </button>
- -->
           </div>
 
         </section>
 
-        <!-- BOTONES -->
+        <!-- =======================================
+             BOTONES
+        ======================================== -->
+
         <div class="buttons">
 
           <button
           type="submit"
           class="save-btn">
+
+            <i class="fa-solid fa-floppy-disk"></i>
 
             Guardar Servicio
 
@@ -268,6 +290,8 @@
           type="button"
           class="pdf-btn"
           onclick="generatePDF()">
+
+            <i class="fa-solid fa-file-pdf"></i>
 
             Generar PDF
 
@@ -279,7 +303,10 @@
 
     </section>
 
-    <!-- TABLA -->
+    <!-- =======================================
+         TABLA
+    ======================================== -->
+
     <section class="table-section">
 
       <h2>
@@ -295,12 +322,19 @@
             <tr>
 
               <th>Cliente</th>
+
               <th>Dirección</th>
+
               <th>Fecha</th>
+
               <th>Tipo</th>
+
               <th>Ticket</th>
+
               <th>Entrada</th>
+
               <th>Salida</th>
+
               <th>Acciones</th>
 
             </tr>
@@ -318,66 +352,78 @@
     </section>
 
   </main>
+
   <!-- =======================================
-     MODAL FIRMA DIGITAL
-======================================= -->
+       MODAL FIRMA DIGITAL
+  ======================================== -->
 
-<div
-id="signatureModal"
-class="signature-modal">
+  <div
+  id="signatureModal"
+  class="signature-modal">
 
-  <div class="signature-modal-content">
+    <div class="signature-modal-content">
 
-    <h2>
-      Firma Digital
-    </h2>
+      <h2>
+        Firma Digital
+      </h2>
 
-    <p>
-      Firma con tu dedo o lápiz táctil
-    </p>
+      <p>
+        Firma con tu dedo, mouse o lápiz táctil
+      </p>
 
-    <!-- CANVAS GRANDE -->
-    <canvas
-    id="modalCanvas"></canvas>
+      <!-- CANVAS -->
 
-    <!-- BOTONES -->
-    <div class="modal-buttons">
+      <canvas
+      id="modalCanvas">
+      </canvas>
 
-      <button
-      type="button"
-      class="clear-signature-btn"
-      onclick="clearModalSignature()">
+      <!-- BOTONES MODAL -->
 
-        Limpiar
+      <div class="modal-buttons">
 
-      </button>
+        <button
+        type="button"
+        class="clear-signature-btn"
+        onclick="clearModalSignature()">
 
-      <button
-      type="button"
-      class="save-signature-btn"
-      onclick="saveSignature()">
+          <i class="fa-solid fa-eraser"></i>
 
-        Guardar Firma
+          Limpiar
 
-      </button>
+        </button>
 
-      <button
-      type="button"
-      class="close-signature-btn"
-      onclick="closeSignatureModal()">
+        <button
+        type="button"
+        class="save-signature-btn"
+        onclick="saveSignature()">
 
-        Cancelar
+          <i class="fa-solid fa-check"></i>
 
-      </button>
+          Guardar Firma
+
+        </button>
+
+        <button
+        type="button"
+        class="close-signature-btn"
+        onclick="closeSignatureModal()">
+
+          <i class="fa-solid fa-xmark"></i>
+
+          Cancelar
+
+        </button>
+
+      </div>
 
     </div>
 
   </div>
 
-</div>
+  <!-- JAVASCRIPT -->
 
-  <!-- JS -->
   <script src="app.js"></script>
 
 </body>
+
 </html>

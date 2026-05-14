@@ -26,6 +26,43 @@ function(e){
 
   e.preventDefault();
 
+  // VALIDAR FIRMAS
+  if(
+    isCanvasEmpty("clientSignature") ||
+    isCanvasEmpty("providerSignature")
+  ){
+
+    alert(
+      "Debes ingresar ambas firmas."
+    );
+
+    return;
+
+  }
+
+  // VALIDAR TICKET DUPLICADO
+  const ticket =
+  document.getElementById(
+    "ticket"
+  ).value;
+
+  const duplicated =
+  services.some(
+    service =>
+    service.ticket === ticket
+  );
+
+  if(duplicated){
+
+    alert(
+      "Ese numero de ticket ya existe."
+    );
+
+    return;
+
+  }
+
+  // CREAR SERVICIO
   const service = {
 
     client:
@@ -44,9 +81,7 @@ function(e){
     ).value,
 
     ticket:
-    document.getElementById(
-      "ticket"
-    ).value,
+    ticket,
 
     entry:
     document.getElementById(
@@ -78,6 +113,12 @@ function(e){
 
   form.reset();
 
+  clearPreviewSignatures();
+
+  alert(
+    "Servicio guardado correctamente."
+  );
+
 });
 
 // =======================================
@@ -108,11 +149,17 @@ function renderTable(){
       <tr>
 
         <td>${service.client}</td>
+
         <td>${service.address}</td>
+
         <td>${service.date}</td>
+
         <td>${service.type}</td>
+
         <td>${service.ticket}</td>
+
         <td>${service.entry}</td>
+
         <td>${service.exit}</td>
 
         <td>
@@ -187,7 +234,7 @@ function editService(index){
 
   service.address =
   prompt(
-    "Dirección:",
+    "Direccion:",
     service.address
   );
 
@@ -223,7 +270,7 @@ function editService(index){
 
   service.description =
   prompt(
-    "Descripción:",
+    "Descripcion:",
     service.description
   );
 
@@ -287,7 +334,6 @@ function resizeModalCanvas(){
     0
   );
 
-  // ESTILOS
   modalCtx.lineWidth = 3;
 
   modalCtx.lineCap = "round";
@@ -316,6 +362,8 @@ function openSignatureModal(targetId){
     "active"
   );
 
+  clearModalSignature();
+
   setTimeout(()=>{
 
     resizeModalCanvas();
@@ -337,7 +385,7 @@ function closeSignatureModal(){
 }
 
 // =======================================
-// LIMPIAR FIRMA
+// LIMPIAR FIRMA MODAL
 // =======================================
 
 function clearModalSignature(){
@@ -360,7 +408,6 @@ function saveSignature(){
   const targetCtx =
   currentTargetCanvas.getContext("2d");
 
-  // LIMPIAR
   targetCtx.clearRect(
     0,
     0,
@@ -368,7 +415,6 @@ function saveSignature(){
     currentTargetCanvas.height
   );
 
-  // DIBUJAR
   targetCtx.drawImage(
     modalCanvas,
     0,
@@ -378,6 +424,62 @@ function saveSignature(){
   );
 
   closeSignatureModal();
+
+}
+
+// =======================================
+// VERIFICAR FIRMA VACIA
+// =======================================
+
+function isCanvasEmpty(canvasId){
+
+  const canvas =
+  document.getElementById(canvasId);
+
+  return !canvas
+  .getContext("2d")
+  .getImageData(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  ).data.some(channel => channel !== 0);
+
+}
+
+// =======================================
+// LIMPIAR PREVIEWS
+// =======================================
+
+function clearPreviewSignatures(){
+
+  const clientCanvas =
+  document.getElementById(
+    "clientSignature"
+  );
+
+  const providerCanvas =
+  document.getElementById(
+    "providerSignature"
+  );
+
+  clientCanvas
+  .getContext("2d")
+  .clearRect(
+    0,
+    0,
+    clientCanvas.width,
+    clientCanvas.height
+  );
+
+  providerCanvas
+  .getContext("2d")
+  .clearRect(
+    0,
+    0,
+    providerCanvas.width,
+    providerCanvas.height
+  );
 
 }
 
@@ -393,8 +495,10 @@ function getPosition(e){
   let x;
   let y;
 
-  // TOUCH
-  if(e.touches && e.touches.length > 0){
+  if(
+    e.touches &&
+    e.touches.length > 0
+  ){
 
     x =
     e.touches[0].clientX - rect.left;
@@ -404,7 +508,6 @@ function getPosition(e){
 
   }
 
-  // MOUSE
   else{
 
     x =
@@ -526,10 +629,24 @@ modalCanvas.addEventListener(
 );
 
 // =======================================
-// GENERAR PDF PROFESIONAL
+// GENERAR PDF
 // =======================================
 
 function generatePDF(){
+
+  // VALIDAR FIRMAS
+  if(
+    isCanvasEmpty("clientSignature") ||
+    isCanvasEmpty("providerSignature")
+  ){
+
+    alert(
+      "Debes ingresar ambas firmas."
+    );
+
+    return;
+
+  }
 
   const { jsPDF } =
   window.jspdf;
@@ -537,10 +654,7 @@ function generatePDF(){
   const doc =
   new jsPDF();
 
-  // =======================================
   // DATOS
-  // =======================================
-
   const client =
   document.getElementById(
     "clientName"
@@ -581,10 +695,7 @@ function generatePDF(){
     "description"
   ).value;
 
-  // =======================================
   // ENCABEZADO
-  // =======================================
-
   doc.setFillColor(31,79,168);
 
   doc.rect(
@@ -617,10 +728,7 @@ function generatePDF(){
     28
   );
 
-  // =======================================
   // TITULO
-  // =======================================
-
   doc.setTextColor(
     0,
     0,
@@ -635,30 +743,7 @@ function generatePDF(){
     50
   );
 
-  // =======================================
   // TABLA
-  // =======================================
-
-  const tableData = [
-
-    ["Cliente", client],
-
-    ["Direccion", address],
-
-    ["Fecha", date],
-
-    ["Ticket", ticket],
-
-    ["Hora Entrada", entry],
-
-    ["Hora Salida", exit],
-
-    ["Tipo Servicio", type],
-
-    ["Descripcion", description]
-
-  ];
-
   doc.autoTable({
 
     startY:60,
@@ -668,7 +753,25 @@ function generatePDF(){
       "Informacion"
     ]],
 
-    body:tableData,
+    body:[
+
+      ["Cliente", client],
+
+      ["Direccion", address],
+
+      ["Fecha", date],
+
+      ["Ticket", ticket],
+
+      ["Hora Entrada", entry],
+
+      ["Hora Salida", exit],
+
+      ["Tipo Servicio", type],
+
+      ["Descripcion", description]
+
+    ],
 
     styles:{
       fontSize:11
@@ -680,10 +783,7 @@ function generatePDF(){
 
   });
 
-  // =======================================
   // FIRMAS
-  // =======================================
-
   const clientCanvas =
   document.getElementById(
     "clientSignature"
@@ -722,7 +822,7 @@ function generatePDF(){
     finalY
   );
 
-  // IMAGEN CLIENTE
+  // IMAGENES
   doc.addImage(
     clientImage,
     "PNG",
@@ -732,7 +832,6 @@ function generatePDF(){
     40
   );
 
-  // IMAGEN TECNICO
   doc.addImage(
     providerImage,
     "PNG",
@@ -757,10 +856,7 @@ function generatePDF(){
     finalY + 48
   );
 
-  // =======================================
-  // PIE DE PAGINA
-  // =======================================
-
+  // PIE
   const currentDate =
   new Date().toLocaleString();
 
@@ -780,13 +876,9 @@ function generatePDF(){
     291
   );
 
-  // =======================================
-  // DESCARGAR PDF
-  // =======================================
-
-  const fileName =
-  `Servicio_${client}_${ticket}.pdf`;
-
-  doc.save(fileName);
+  // DESCARGAR
+  doc.save(
+    `Servicio_${client}_${ticket}.pdf`
+  );
 
 }
