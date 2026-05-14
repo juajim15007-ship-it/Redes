@@ -1,20 +1,61 @@
 // =======================================
-// BASE DE DATOS TEMPORAL
+// SUPABASE
 // =======================================
 
-let services = JSON.parse(
-  localStorage.getItem("services")
-) || [];
+const supabaseUrl =
+"https://rzcxkkztzvokiroxofjg.supabase.co/rest/v1/";
+
+const supabaseKey =
+"sb_publishable_DO65iz0TYgYZvNs0OssC4w_gcty9tri";
+
+const supabase =
+window.supabase.createClient(
+  supabaseUrl,
+  supabaseKey
+);
 
 // =======================================
 // ELEMENTOS
 // =======================================
 
 const form =
-document.getElementById("serviceForm");
+document.getElementById(
+  "serviceForm"
+);
 
 const tableBody =
-document.getElementById("tableBody");
+document.getElementById(
+  "tableBody"
+);
+
+// =======================================
+// CARGAR SERVICIOS
+// =======================================
+
+async function loadServices(){
+
+  const { data, error } =
+  await supabase
+  .from("services")
+  .select("*")
+  .order("id",{
+    ascending:false
+  });
+
+  if(error){
+
+    console.error(
+      "Error cargando:",
+      error
+    );
+
+    return;
+
+  }
+
+  renderTable(data);
+
+}
 
 // =======================================
 // GUARDAR SERVICIO
@@ -22,47 +63,10 @@ document.getElementById("tableBody");
 
 form.addEventListener(
 "submit",
-function(e){
+async function(e){
 
   e.preventDefault();
 
-  // VALIDAR FIRMAS
-  if(
-    isCanvasEmpty("clientSignature") ||
-    isCanvasEmpty("providerSignature")
-  ){
-
-    alert(
-      "Debes ingresar ambas firmas."
-    );
-
-    return;
-
-  }
-
-  // VALIDAR TICKET DUPLICADO
-  const ticket =
-  document.getElementById(
-    "ticket"
-  ).value;
-
-  const duplicated =
-  services.some(
-    service =>
-    service.ticket === ticket
-  );
-
-  if(duplicated){
-
-    alert(
-      "Ese numero de ticket ya existe."
-    );
-
-    return;
-
-  }
-
-  // CREAR SERVICIO
   const service = {
 
     client:
@@ -75,25 +79,27 @@ function(e){
       "address"
     ).value,
 
-    date:
+    service_date:
     document.getElementById(
       "date"
     ).value,
 
     ticket:
-    ticket,
+    document.getElementById(
+      "ticket"
+    ).value,
 
-    entry:
+    entry_time:
     document.getElementById(
       "entryTime"
     ).value,
 
-    exit:
+    exit_time:
     document.getElementById(
       "exitTime"
     ).value,
 
-    type:
+    service_type:
     document.getElementById(
       "serviceType"
     ).value,
@@ -105,44 +111,52 @@ function(e){
 
   };
 
-  services.push(service);
+  const { error } =
+  await supabase
+  .from("services")
+  .insert([
+    service
+  ]);
 
-  saveServices();
+  if(error){
 
-  renderTable();
+    console.error(error);
+
+    alert(
+      "Error guardando servicio"
+    );
+
+    return;
+
+  }
+
+  alert(
+    "Servicio guardado correctamente"
+  );
 
   form.reset();
 
-  clearPreviewSignatures();
-
-  alert(
-    "Servicio guardado correctamente."
+  clearPreviewSignature(
+    "clientSignature"
   );
+
+  clearPreviewSignature(
+    "providerSignature"
+  );
+
+  loadServices();
 
 });
 
 // =======================================
-// GUARDAR LOCALSTORAGE
+// RENDER TABLA
 // =======================================
 
-function saveServices(){
-
-  localStorage.setItem(
-    "services",
-    JSON.stringify(services)
-  );
-
-}
-
-// =======================================
-// MOSTRAR TABLA
-// =======================================
-
-function renderTable(){
+function renderTable(services){
 
   tableBody.innerHTML = "";
 
-  services.forEach((service,index)=>{
+  services.forEach(service=>{
 
     tableBody.innerHTML += `
 
@@ -152,15 +166,15 @@ function renderTable(){
 
         <td>${service.address}</td>
 
-        <td>${service.date}</td>
+        <td>${service.service_date}</td>
 
-        <td>${service.type}</td>
+        <td>${service.service_type}</td>
 
         <td>${service.ticket}</td>
 
-        <td>${service.entry}</td>
+        <td>${service.entry_time}</td>
 
-        <td>${service.exit}</td>
+        <td>${service.exit_time}</td>
 
         <td>
 
@@ -168,7 +182,7 @@ function renderTable(){
 
             <button
             class="edit-btn"
-            onclick="editService(${index})">
+            onclick="editService(${service.id})">
 
               Editar
 
@@ -176,7 +190,7 @@ function renderTable(){
 
             <button
             class="delete-btn"
-            onclick="deleteService(${index})">
+            onclick="deleteService(${service.id})">
 
               Eliminar
 
@@ -198,22 +212,30 @@ function renderTable(){
 // ELIMINAR SERVICIO
 // =======================================
 
-function deleteService(index){
+async function deleteService(id){
 
   const confirmDelete =
   confirm(
     "¿Eliminar servicio?"
   );
 
-  if(confirmDelete){
+  if(!confirmDelete) return;
 
-    services.splice(index,1);
+  const { error } =
+  await supabase
+  .from("services")
+  .delete()
+  .eq("id",id);
 
-    saveServices();
+  if(error){
 
-    renderTable();
+    console.error(error);
+
+    return;
 
   }
+
+  loadServices();
 
 }
 
@@ -221,70 +243,66 @@ function deleteService(index){
 // EDITAR SERVICIO
 // =======================================
 
-function editService(index){
+async function editService(id){
 
-  const service =
-  services[index];
+  const { data, error } =
+  await supabase
+  .from("services")
+  .select("*")
+  .eq("id",id)
+  .single();
 
-  service.client =
+  if(error){
+
+    console.error(error);
+
+    return;
+
+  }
+
+  const client =
   prompt(
     "Cliente:",
-    service.client
+    data.client
   );
 
-  service.address =
+  const address =
   prompt(
-    "Direccion:",
-    service.address
+    "Dirección:",
+    data.address
   );
 
-  service.date =
+  const description =
   prompt(
-    "Fecha:",
-    service.date
+    "Descripción:",
+    data.description
   );
 
-  service.ticket =
-  prompt(
-    "Ticket:",
-    service.ticket
-  );
+  const { error:updateError } =
+  await supabase
+  .from("services")
+  .update({
 
-  service.entry =
-  prompt(
-    "Hora entrada:",
-    service.entry
-  );
+    client,
 
-  service.exit =
-  prompt(
-    "Hora salida:",
-    service.exit
-  );
+    address,
 
-  service.type =
-  prompt(
-    "Tipo:",
-    service.type
-  );
+    description
 
-  service.description =
-  prompt(
-    "Descripcion:",
-    service.description
-  );
+  })
+  .eq("id",id);
 
-  saveServices();
+  if(updateError){
 
-  renderTable();
+    console.error(updateError);
+
+    return;
+
+  }
+
+  loadServices();
 
 }
-
-// =======================================
-// MOSTRAR TABLA AL CARGAR
-// =======================================
-
-renderTable();
 
 // =======================================
 // MODAL FIRMA DIGITAL
@@ -362,8 +380,6 @@ function openSignatureModal(targetId){
     "active"
   );
 
-  clearModalSignature();
-
   setTimeout(()=>{
 
     resizeModalCanvas();
@@ -385,7 +401,7 @@ function closeSignatureModal(){
 }
 
 // =======================================
-// LIMPIAR FIRMA MODAL
+// LIMPIAR MODAL
 // =======================================
 
 function clearModalSignature(){
@@ -395,6 +411,27 @@ function clearModalSignature(){
     0,
     modalCanvas.width,
     modalCanvas.height
+  );
+
+}
+
+// =======================================
+// LIMPIAR PREVIEW
+// =======================================
+
+function clearPreviewSignature(canvasId){
+
+  const canvas =
+  document.getElementById(canvasId);
+
+  const ctx =
+  canvas.getContext("2d");
+
+  ctx.clearRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
   );
 
 }
@@ -428,62 +465,6 @@ function saveSignature(){
 }
 
 // =======================================
-// VERIFICAR FIRMA VACIA
-// =======================================
-
-function isCanvasEmpty(canvasId){
-
-  const canvas =
-  document.getElementById(canvasId);
-
-  return !canvas
-  .getContext("2d")
-  .getImageData(
-    0,
-    0,
-    canvas.width,
-    canvas.height
-  ).data.some(channel => channel !== 0);
-
-}
-
-// =======================================
-// LIMPIAR PREVIEWS
-// =======================================
-
-function clearPreviewSignatures(){
-
-  const clientCanvas =
-  document.getElementById(
-    "clientSignature"
-  );
-
-  const providerCanvas =
-  document.getElementById(
-    "providerSignature"
-  );
-
-  clientCanvas
-  .getContext("2d")
-  .clearRect(
-    0,
-    0,
-    clientCanvas.width,
-    clientCanvas.height
-  );
-
-  providerCanvas
-  .getContext("2d")
-  .clearRect(
-    0,
-    0,
-    providerCanvas.width,
-    providerCanvas.height
-  );
-
-}
-
-// =======================================
 // POSICION
 // =======================================
 
@@ -495,10 +476,7 @@ function getPosition(e){
   let x;
   let y;
 
-  if(
-    e.touches &&
-    e.touches.length > 0
-  ){
+  if(e.touches){
 
     x =
     e.touches[0].clientX - rect.left;
@@ -506,9 +484,7 @@ function getPosition(e){
     y =
     e.touches[0].clientY - rect.top;
 
-  }
-
-  else{
+  }else{
 
     x =
     e.clientX - rect.left;
@@ -523,7 +499,7 @@ function getPosition(e){
 }
 
 // =======================================
-// INICIAR
+// INICIAR DIBUJO
 // =======================================
 
 function startDraw(e){
@@ -634,27 +610,12 @@ modalCanvas.addEventListener(
 
 function generatePDF(){
 
-  // VALIDAR FIRMAS
-  if(
-    isCanvasEmpty("clientSignature") ||
-    isCanvasEmpty("providerSignature")
-  ){
-
-    alert(
-      "Debes ingresar ambas firmas."
-    );
-
-    return;
-
-  }
-
   const { jsPDF } =
   window.jspdf;
 
   const doc =
   new jsPDF();
 
-  // DATOS
   const client =
   document.getElementById(
     "clientName"
@@ -695,8 +656,13 @@ function generatePDF(){
     "description"
   ).value;
 
-  // ENCABEZADO
-  doc.setFillColor(31,79,168);
+  // HEADER
+
+  doc.setFillColor(
+    31,
+    79,
+    168
+  );
 
   doc.rect(
     0,
@@ -715,7 +681,7 @@ function generatePDF(){
   doc.setFontSize(24);
 
   doc.text(
-    "Redes",
+    "TU EMPRESA",
     15,
     20
   );
@@ -723,12 +689,13 @@ function generatePDF(){
   doc.setFontSize(12);
 
   doc.text(
-    "Copia de Servicio Tecnico",
+    "Reporte Tecnico de Servicio",
     15,
     28
   );
 
   // TITULO
+
   doc.setTextColor(
     0,
     0,
@@ -744,6 +711,27 @@ function generatePDF(){
   );
 
   // TABLA
+
+  const tableData = [
+
+    ["Cliente", client],
+
+    ["Direccion", address],
+
+    ["Fecha", date],
+
+    ["Ticket", ticket],
+
+    ["Hora Entrada", entry],
+
+    ["Hora Salida", exit],
+
+    ["Tipo Servicio", type],
+
+    ["Descripcion", description]
+
+  ];
+
   doc.autoTable({
 
     startY:60,
@@ -753,25 +741,7 @@ function generatePDF(){
       "Informacion"
     ]],
 
-    body:[
-
-      ["Cliente", client],
-
-      ["Direccion", address],
-
-      ["Fecha", date],
-
-      ["Ticket", ticket],
-
-      ["Hora Entrada", entry],
-
-      ["Hora Salida", exit],
-
-      ["Tipo Servicio", type],
-
-      ["Descripcion", description]
-
-    ],
+    body:tableData,
 
     styles:{
       fontSize:11
@@ -784,6 +754,7 @@ function generatePDF(){
   });
 
   // FIRMAS
+
   const clientCanvas =
   document.getElementById(
     "clientSignature"
@@ -807,9 +778,6 @@ function generatePDF(){
   const finalY =
   doc.lastAutoTable.finalY + 30;
 
-  // TITULOS
-  doc.setFontSize(12);
-
   doc.text(
     "Firma Cliente",
     25,
@@ -822,7 +790,6 @@ function generatePDF(){
     finalY
   );
 
-  // IMAGENES
   doc.addImage(
     clientImage,
     "PNG",
@@ -841,7 +808,6 @@ function generatePDF(){
     40
   );
 
-  // LINEAS
   doc.line(
     15,
     finalY + 48,
@@ -857,6 +823,7 @@ function generatePDF(){
   );
 
   // PIE
+
   const currentDate =
   new Date().toLocaleString();
 
@@ -865,20 +832,27 @@ function generatePDF(){
   doc.setTextColor(120);
 
   doc.text(
-    "Documento generado automaticamente por Telecom Manager",
+    "Documento generado automaticamente",
     14,
     285
   );
 
   doc.text(
-    `Fecha de generacion: ${currentDate}`,
+    `Fecha: ${currentDate}`,
     14,
     291
   );
 
-  // DESCARGAR
+  // DESCARGA
+
   doc.save(
     `Servicio_${client}_${ticket}.pdf`
   );
 
 }
+
+// =======================================
+// INICIAR
+// =======================================
+
+loadServices();
