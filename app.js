@@ -1,16 +1,25 @@
+// =======================================
 // BASE DE DATOS TEMPORAL
+// =======================================
+
 let services = JSON.parse(
   localStorage.getItem("services")
 ) || [];
 
+// =======================================
 // ELEMENTOS
+// =======================================
+
 const form =
 document.getElementById("serviceForm");
 
 const tableBody =
 document.getElementById("tableBody");
 
+// =======================================
 // GUARDAR SERVICIO
+// =======================================
+
 form.addEventListener(
 "submit",
 function(e){
@@ -71,7 +80,10 @@ function(e){
 
 });
 
+// =======================================
 // GUARDAR LOCALSTORAGE
+// =======================================
+
 function saveServices(){
 
   localStorage.setItem(
@@ -81,7 +93,10 @@ function saveServices(){
 
 }
 
-// RENDER TABLA
+// =======================================
+// MOSTRAR TABLA
+// =======================================
+
 function renderTable(){
 
   tableBody.innerHTML = "";
@@ -102,25 +117,25 @@ function renderTable(){
 
         <td>
 
-            <div class="actions">
+          <div class="actions">
 
-                <button
-                    class="edit-btn"
-                    onclick="editService(${index})">
+            <button
+            class="edit-btn"
+            onclick="editService(${index})">
 
-                    Editar
+              Editar
 
-                </button>
+            </button>
 
-                <button
-                    class="delete-btn"
-                    onclick="deleteService(${index})">
+            <button
+            class="delete-btn"
+            onclick="deleteService(${index})">
 
-                    Eliminar
+              Eliminar
 
-                </button>
+            </button>
 
-            </div>
+          </div>
 
         </td>
 
@@ -132,7 +147,10 @@ function renderTable(){
 
 }
 
-// ELIMINAR
+// =======================================
+// ELIMINAR SERVICIO
+// =======================================
+
 function deleteService(index){
 
   const confirmDelete =
@@ -152,7 +170,10 @@ function deleteService(index){
 
 }
 
-// EDITAR
+// =======================================
+// EDITAR SERVICIO
+// =======================================
+
 function editService(index){
 
   const service =
@@ -212,191 +233,272 @@ function editService(index){
 
 }
 
-// MOSTRAR TABLA
+// =======================================
+// MOSTRAR TABLA AL CARGAR
+// =======================================
+
 renderTable();
 
 // =======================================
-// FIRMA DIGITAL COMPATIBLE MOVIL + PC
+// MODAL FIRMA DIGITAL
 // =======================================
 
-function setupCanvas(canvasId){
+const signatureModal =
+document.getElementById(
+  "signatureModal"
+);
 
-  const canvas =
-  document.getElementById(canvasId);
+const modalCanvas =
+document.getElementById(
+  "modalCanvas"
+);
 
-  const ctx =
-  canvas.getContext("2d");
+const modalCtx =
+modalCanvas.getContext("2d");
 
-  let drawing = false;
+let currentTargetCanvas = null;
 
-  // AJUSTAR RESOLUCION
-  function resizeCanvas(){
+let drawing = false;
 
-    const ratio =
-    window.devicePixelRatio || 1;
+// =======================================
+// CONFIGURACION DIBUJO
+// =======================================
 
-    canvas.width =
-    canvas.offsetWidth * ratio;
+modalCtx.lineWidth = 3;
 
-    canvas.height =
-    canvas.offsetHeight * ratio;
+modalCtx.lineCap = "round";
 
-    ctx.scale(ratio, ratio);
+modalCtx.strokeStyle = "#000";
 
-    ctx.lineWidth = 2.5;
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "#000";
+// =======================================
+// AJUSTAR CALIDAD CANVAS
+// =======================================
 
-  }
+function resizeModalCanvas(){
 
-  resizeCanvas();
+  const ratio =
+  window.devicePixelRatio || 1;
 
-  // OBTENER POSICION
-  function getPosition(e){
+  modalCanvas.width =
+  modalCanvas.offsetWidth * ratio;
 
-    const rect =
-    canvas.getBoundingClientRect();
+  modalCanvas.height =
+  modalCanvas.offsetHeight * ratio;
 
-    // TOUCH
-    if(e.touches){
+  modalCtx.scale(ratio, ratio);
 
-      return {
+}
 
-        x:
-        e.touches[0].clientX - rect.left,
+resizeModalCanvas();
 
-        y:
-        e.touches[0].clientY - rect.top
+// =======================================
+// ABRIR MODAL
+// =======================================
 
-      };
+function openSignatureModal(targetId){
 
-    }
+  currentTargetCanvas =
+  document.getElementById(targetId);
 
-    // MOUSE
+  signatureModal.classList.add(
+    "active"
+  );
+
+  clearModalSignature();
+
+}
+
+// =======================================
+// CERRAR MODAL
+// =======================================
+
+function closeSignatureModal(){
+
+  signatureModal.classList.remove(
+    "active"
+  );
+
+}
+
+// =======================================
+// LIMPIAR FIRMA MODAL
+// =======================================
+
+function clearModalSignature(){
+
+  modalCtx.clearRect(
+    0,
+    0,
+    modalCanvas.width,
+    modalCanvas.height
+  );
+
+}
+
+// =======================================
+// GUARDAR FIRMA
+// =======================================
+
+function saveSignature(){
+
+  const targetCtx =
+  currentTargetCanvas.getContext("2d");
+
+  targetCtx.clearRect(
+    0,
+    0,
+    currentTargetCanvas.width,
+    currentTargetCanvas.height
+  );
+
+  targetCtx.drawImage(
+    modalCanvas,
+    0,
+    0,
+    currentTargetCanvas.width,
+    currentTargetCanvas.height
+  );
+
+  closeSignatureModal();
+
+}
+
+// =======================================
+// OBTENER POSICION
+// =======================================
+
+function getPos(e){
+
+  const rect =
+  modalCanvas.getBoundingClientRect();
+
+  if(e.touches){
+
     return {
 
       x:
-      e.clientX - rect.left,
+      e.touches[0].clientX - rect.left,
 
       y:
-      e.clientY - rect.top
+      e.touches[0].clientY - rect.top
 
     };
 
   }
 
-  // INICIAR
-  function start(e){
+  return {
 
-    drawing = true;
+    x:
+    e.clientX - rect.left,
 
-    const pos =
-    getPosition(e);
+    y:
+    e.clientY - rect.top
 
-    ctx.beginPath();
-
-    ctx.moveTo(pos.x, pos.y);
-
-    e.preventDefault();
-
-  }
-
-  // DIBUJAR
-  function draw(e){
-
-    if(!drawing) return;
-
-    const pos =
-    getPosition(e);
-
-    ctx.lineTo(pos.x, pos.y);
-
-    ctx.stroke();
-
-    e.preventDefault();
-
-  }
-
-  // FINALIZAR
-  function stop(){
-
-    drawing = false;
-
-    ctx.beginPath();
-
-  }
-
-  // =======================================
-  // EVENTOS PC
-  // =======================================
-
-  canvas.addEventListener(
-    "mousedown",
-    start
-  );
-
-  canvas.addEventListener(
-    "mousemove",
-    draw
-  );
-
-  canvas.addEventListener(
-    "mouseup",
-    stop
-  );
-
-  canvas.addEventListener(
-    "mouseleave",
-    stop
-  );
-
-  // =======================================
-  // EVENTOS MOVIL
-  // =======================================
-
-  canvas.addEventListener(
-    "touchstart",
-    start,
-    { passive:false }
-  );
-
-  canvas.addEventListener(
-    "touchmove",
-    draw,
-    { passive:false }
-  );
-
-  canvas.addEventListener(
-    "touchend",
-    stop
-  );
+  };
 
 }
 
-// ACTIVAR FIRMAS
-setupCanvas("clientSignature");
-setupCanvas("providerSignature");
-
 // =======================================
-// LIMPIAR FIRMA
+// INICIAR DIBUJO
 // =======================================
 
-function clearCanvas(canvasId){
+function startDraw(e){
 
-  const canvas =
-  document.getElementById(canvasId);
+  drawing = true;
 
-  const ctx =
-  canvas.getContext("2d");
+  const pos =
+  getPos(e);
 
-  ctx.clearRect(
-    0,
-    0,
-    canvas.width,
-    canvas.height
+  modalCtx.beginPath();
+
+  modalCtx.moveTo(
+    pos.x,
+    pos.y
   );
 
+  e.preventDefault();
+
 }
+
+// =======================================
+// DIBUJAR
+// =======================================
+
+function draw(e){
+
+  if(!drawing) return;
+
+  const pos =
+  getPos(e);
+
+  modalCtx.lineTo(
+    pos.x,
+    pos.y
+  );
+
+  modalCtx.stroke();
+
+  e.preventDefault();
+
+}
+
+// =======================================
+// FINALIZAR
+// =======================================
+
+function stopDraw(){
+
+  drawing = false;
+
+  modalCtx.beginPath();
+
+}
+
+// =======================================
+// EVENTOS PC
+// =======================================
+
+modalCanvas.addEventListener(
+  "mousedown",
+  startDraw
+);
+
+modalCanvas.addEventListener(
+  "mousemove",
+  draw
+);
+
+modalCanvas.addEventListener(
+  "mouseup",
+  stopDraw
+);
+
+modalCanvas.addEventListener(
+  "mouseleave",
+  stopDraw
+);
+
+// =======================================
+// EVENTOS MOVIL
+// =======================================
+
+modalCanvas.addEventListener(
+  "touchstart",
+  startDraw,
+  { passive:false }
+);
+
+modalCanvas.addEventListener(
+  "touchmove",
+  draw,
+  { passive:false }
+);
+
+modalCanvas.addEventListener(
+  "touchend",
+  stopDraw
+);
+
 // =======================================
 // GENERAR PDF PROFESIONAL
 // =======================================
@@ -467,7 +569,11 @@ function generatePDF(){
     "F"
   );
 
-  doc.setTextColor(255,255,255);
+  doc.setTextColor(
+    255,
+    255,
+    255
+  );
 
   doc.setFontSize(24);
 
@@ -489,7 +595,11 @@ function generatePDF(){
   // TITULO
   // =======================================
 
-  doc.setTextColor(0,0,0);
+  doc.setTextColor(
+    0,
+    0,
+    0
+  );
 
   doc.setFontSize(18);
 
@@ -569,40 +679,56 @@ function generatePDF(){
   );
 
   const finalY =
-  doc.lastAutoTable.finalY + 25;
+  doc.lastAutoTable.finalY + 30;
 
-  // CLIENTE
+  // TITULOS
   doc.setFontSize(12);
 
   doc.text(
     "Firma Cliente",
-    20,
+    25,
     finalY
   );
 
+  doc.text(
+    "Firma Tecnico",
+    125,
+    finalY
+  );
+
+  // IMAGEN CLIENTE
   doc.addImage(
     clientImage,
     "PNG",
     15,
     finalY + 5,
-    70,
-    35
+    80,
+    40
   );
 
-  // TECNICO
-  doc.text(
-    "Firma Prestador",
-    120,
-    finalY
-  );
-
+  // IMAGEN TECNICO
   doc.addImage(
     providerImage,
     "PNG",
     115,
     finalY + 5,
-    70,
-    35
+    80,
+    40
+  );
+
+  // LINEAS
+  doc.line(
+    15,
+    finalY + 48,
+    95,
+    finalY + 48
+  );
+
+  doc.line(
+    115,
+    finalY + 48,
+    195,
+    finalY + 48
   );
 
   // =======================================
@@ -638,215 +764,3 @@ function generatePDF(){
   doc.save(fileName);
 
 }
-// =======================================
-// MODAL FIRMA DIGITAL
-// =======================================
-
-const signatureModal =
-document.getElementById(
-  "signatureModal"
-);
-
-const modalCanvas =
-document.getElementById(
-  "modalCanvas"
-);
-
-const modalCtx =
-modalCanvas.getContext("2d");
-
-let currentTargetCanvas = null;
-
-let drawing = false;
-
-// AJUSTAR CANVAS
-function resizeModalCanvas(){
-
-  modalCanvas.width =
-  modalCanvas.offsetWidth;
-
-  modalCanvas.height =
-  modalCanvas.offsetHeight;
-
-}
-
-resizeModalCanvas();
-
-// ABRIR MODAL
-function openSignatureModal(targetId){
-
-  currentTargetCanvas =
-  document.getElementById(targetId);
-
-  signatureModal.classList.add(
-    "active"
-  );
-
-  clearModalSignature();
-
-}
-
-// CERRAR MODAL
-function closeSignatureModal(){
-
-  signatureModal.classList.remove(
-    "active"
-  );
-
-}
-
-// LIMPIAR
-function clearModalSignature(){
-
-  modalCtx.clearRect(
-    0,
-    0,
-    modalCanvas.width,
-    modalCanvas.height
-  );
-
-}
-
-// GUARDAR FIRMA
-function saveSignature(){
-
-  const targetCtx =
-  currentTargetCanvas.getContext("2d");
-
-  targetCtx.clearRect(
-    0,
-    0,
-    currentTargetCanvas.width,
-    currentTargetCanvas.height
-  );
-
-  targetCtx.drawImage(
-    modalCanvas,
-    0,
-    0,
-    currentTargetCanvas.width,
-    currentTargetCanvas.height
-  );
-
-  closeSignatureModal();
-
-}
-
-// =======================================
-// DIBUJO TOUCH + PC
-// =======================================
-
-function getPos(e){
-
-  const rect =
-  modalCanvas.getBoundingClientRect();
-
-  if(e.touches){
-
-    return {
-
-      x:
-      e.touches[0].clientX - rect.left,
-
-      y:
-      e.touches[0].clientY - rect.top
-
-    };
-
-  }
-
-  return {
-
-    x:
-    e.clientX - rect.left,
-
-    y:
-    e.clientY - rect.top
-
-  };
-
-}
-
-// INICIAR
-function startDraw(e){
-
-  drawing = true;
-
-  const pos = getPos(e);
-
-  modalCtx.beginPath();
-
-  modalCtx.moveTo(pos.x, pos.y);
-
-  e.preventDefault();
-
-}
-
-// DIBUJAR
-function draw(e){
-
-  if(!drawing) return;
-
-  const pos = getPos(e);
-
-  modalCtx.lineWidth = 3;
-
-  modalCtx.lineCap = "round";
-
-  modalCtx.strokeStyle = "#000";
-
-  modalCtx.lineTo(pos.x, pos.y);
-
-  modalCtx.stroke();
-
-  e.preventDefault();
-
-}
-
-// FINALIZAR
-function stopDraw(){
-
-  drawing = false;
-
-  modalCtx.beginPath();
-
-}
-
-// EVENTOS PC
-modalCanvas.addEventListener(
-  "mousedown",
-  startDraw
-);
-
-modalCanvas.addEventListener(
-  "mousemove",
-  draw
-);
-
-modalCanvas.addEventListener(
-  "mouseup",
-  stopDraw
-);
-
-modalCanvas.addEventListener(
-  "mouseleave",
-  stopDraw
-);
-
-// EVENTOS MOVIL
-modalCanvas.addEventListener(
-  "touchstart",
-  startDraw,
-  { passive:false }
-);
-
-modalCanvas.addEventListener(
-  "touchmove",
-  draw,
-  { passive:false }
-);
-
-modalCanvas.addEventListener(
-  "touchend",
-  stopDraw
-);
