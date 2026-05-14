@@ -397,8 +397,10 @@ function clearCanvas(canvasId){
   );
 
 }
+// =======================================
+// GENERAR PDF PROFESIONAL
+// =======================================
 
-// GENERAR PDF
 function generatePDF(){
 
   const { jsPDF } =
@@ -407,87 +409,232 @@ function generatePDF(){
   const doc =
   new jsPDF();
 
+  // =======================================
+  // DATOS
+  // =======================================
+
+  const client =
+  document.getElementById(
+    "clientName"
+  ).value;
+
+  const address =
+  document.getElementById(
+    "address"
+  ).value;
+
+  const date =
+  document.getElementById(
+    "date"
+  ).value;
+
+  const ticket =
+  document.getElementById(
+    "ticket"
+  ).value;
+
+  const entry =
+  document.getElementById(
+    "entryTime"
+  ).value;
+
+  const exit =
+  document.getElementById(
+    "exitTime"
+  ).value;
+
+  const type =
+  document.getElementById(
+    "serviceType"
+  ).value;
+
+  const description =
+  document.getElementById(
+    "description"
+  ).value;
+
+  // =======================================
+  // ENCABEZADO
+  // =======================================
+
+  doc.setFillColor(31,79,168);
+
+  doc.rect(
+    0,
+    0,
+    220,
+    35,
+    "F"
+  );
+
+  doc.setTextColor(255,255,255);
+
+  doc.setFontSize(24);
+
   doc.text(
-    "Reporte Servicio Técnico",
-    20,
+    "Telecom Manager",
+    15,
     20
   );
 
-  const data = [
+  doc.setFontSize(12);
 
-    [
-      "Cliente",
-      document.getElementById(
-        "clientName"
-      ).value
-    ],
+  doc.text(
+    "Copia de Servicio Tecnico",
+    15,
+    28
+  );
 
-    [
-      "Dirección",
-      document.getElementById(
-        "address"
-      ).value
-    ],
+  // =======================================
+  // TITULO
+  // =======================================
 
-    [
-      "Fecha",
-      document.getElementById(
-        "date"
-      ).value
-    ],
+  doc.setTextColor(0,0,0);
 
-    [
-      "Ticket",
-      document.getElementById(
-        "ticket"
-      ).value
-    ],
+  doc.setFontSize(18);
 
-    [
-      "Hora Entrada",
-      document.getElementById(
-        "entryTime"
-      ).value
-    ],
+  doc.text(
+    "Reporte de Servicio",
+    14,
+    50
+  );
 
-    [
-      "Hora Salida",
-      document.getElementById(
-        "exitTime"
-      ).value
-    ],
+  // =======================================
+  // TABLA
+  // =======================================
 
-    [
-      "Tipo",
-      document.getElementById(
-        "serviceType"
-      ).value
-    ],
+  const tableData = [
 
-    [
-      "Descripción",
-      document.getElementById(
-        "description"
-      ).value
-    ]
+    ["Cliente", client],
+
+    ["Direccion", address],
+
+    ["Fecha", date],
+
+    ["Ticket", ticket],
+
+    ["Hora Entrada", entry],
+
+    ["Hora Salida", exit],
+
+    ["Tipo Servicio", type],
+
+    ["Descripcion", description]
 
   ];
 
   doc.autoTable({
 
-    startY:30,
+    startY:60,
 
     head:[[
       "Campo",
-      "Información"
+      "Informacion"
     ]],
 
-    body:data
+    body:tableData,
+
+    styles:{
+      fontSize:11
+    },
+
+    headStyles:{
+      fillColor:[31,79,168]
+    }
 
   });
 
-  doc.save(
-    "reporte-servicio.pdf"
+  // =======================================
+  // FIRMAS
+  // =======================================
+
+  const clientCanvas =
+  document.getElementById(
+    "clientSignature"
   );
+
+  const providerCanvas =
+  document.getElementById(
+    "providerSignature"
+  );
+
+  const clientImage =
+  clientCanvas.toDataURL(
+    "image/png"
+  );
+
+  const providerImage =
+  providerCanvas.toDataURL(
+    "image/png"
+  );
+
+  const finalY =
+  doc.lastAutoTable.finalY + 25;
+
+  // CLIENTE
+  doc.setFontSize(12);
+
+  doc.text(
+    "Firma Cliente",
+    20,
+    finalY
+  );
+
+  doc.addImage(
+    clientImage,
+    "PNG",
+    15,
+    finalY + 5,
+    70,
+    35
+  );
+
+  // TECNICO
+  doc.text(
+    "Firma Prestador",
+    120,
+    finalY
+  );
+
+  doc.addImage(
+    providerImage,
+    "PNG",
+    115,
+    finalY + 5,
+    70,
+    35
+  );
+
+  // =======================================
+  // PIE DE PAGINA
+  // =======================================
+
+  const currentDate =
+  new Date().toLocaleString();
+
+  doc.setFontSize(10);
+
+  doc.setTextColor(120);
+
+  doc.text(
+    "Documento generado automaticamente por Telecom Manager",
+    14,
+    285
+  );
+
+  doc.text(
+    `Fecha de generacion: ${currentDate}`,
+    14,
+    291
+  );
+
+  // =======================================
+  // DESCARGAR PDF
+  // =======================================
+
+  const fileName =
+  `Servicio_${client}_${ticket}.pdf`;
+
+  doc.save(fileName);
 
 }
