@@ -715,7 +715,7 @@ function generatePDF(){
   doc.setFontSize(24);
 
   doc.text(
-    "Telecom Manager",
+    "Redes",
     15,
     20
   );
