@@ -326,31 +326,19 @@ let currentTargetCanvas = null;
 let drawing = false;
 
 // =======================================
-// AJUSTAR CANVAS
+// AJUSTAR TAMAÑO REAL
 // =======================================
 
 function resizeModalCanvas(){
-
-  const ratio =
-  window.devicePixelRatio || 1;
 
   const rect =
   modalCanvas.getBoundingClientRect();
 
   modalCanvas.width =
-  rect.width * ratio;
+  rect.width;
 
   modalCanvas.height =
-  rect.height * ratio;
-
-  modalCtx.setTransform(
-    ratio,
-    0,
-    0,
-    ratio,
-    0,
-    0
-  );
+  rect.height;
 
   modalCtx.lineWidth = 3;
 
@@ -359,8 +347,6 @@ function resizeModalCanvas(){
   modalCtx.strokeStyle = "#000";
 
 }
-
-resizeModalCanvas();
 
 window.addEventListener(
   "resize",
@@ -389,7 +375,7 @@ function openSignatureModal(targetId){
 }
 
 // =======================================
-// CERRAR MODAL
+// CERRAR
 // =======================================
 
 function closeSignatureModal(){
@@ -401,7 +387,7 @@ function closeSignatureModal(){
 }
 
 // =======================================
-// LIMPIAR MODAL
+// LIMPIAR FIRMA
 // =======================================
 
 function clearModalSignature(){
@@ -411,27 +397,6 @@ function clearModalSignature(){
     0,
     modalCanvas.width,
     modalCanvas.height
-  );
-
-}
-
-// =======================================
-// LIMPIAR PREVIEW
-// =======================================
-
-function clearPreviewSignature(canvasId){
-
-  const canvas =
-  document.getElementById(canvasId);
-
-  const ctx =
-  canvas.getContext("2d");
-
-  ctx.clearRect(
-    0,
-    0,
-    canvas.width,
-    canvas.height
   );
 
 }
@@ -465,7 +430,7 @@ function saveSignature(){
 }
 
 // =======================================
-// POSICION
+// OBTENER POSICION
 // =======================================
 
 function getPosition(e){
@@ -476,13 +441,18 @@ function getPosition(e){
   let x;
   let y;
 
-  if(e.touches){
+  if(
+    e.touches &&
+    e.touches.length > 0
+  ){
 
     x =
-    e.touches[0].clientX - rect.left;
+    e.touches[0].clientX -
+    rect.left;
 
     y =
-    e.touches[0].clientY - rect.top;
+    e.touches[0].clientY -
+    rect.top;
 
   }else{
 
@@ -499,7 +469,7 @@ function getPosition(e){
 }
 
 // =======================================
-// INICIAR DIBUJO
+// EMPEZAR DIBUJO
 // =======================================
 
 function startDraw(e){
@@ -543,7 +513,7 @@ function draw(e){
 }
 
 // =======================================
-// FINALIZAR
+// TERMINAR
 // =======================================
 
 function stopDraw(){
@@ -555,7 +525,7 @@ function stopDraw(){
 }
 
 // =======================================
-// EVENTOS MOUSE
+// EVENTOS PC
 // =======================================
 
 modalCanvas.addEventListener(
@@ -579,7 +549,7 @@ modalCanvas.addEventListener(
 );
 
 // =======================================
-// EVENTOS TOUCH
+// EVENTOS MOVIL
 // =======================================
 
 modalCanvas.addEventListener(
