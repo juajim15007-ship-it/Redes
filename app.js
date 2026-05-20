@@ -1,12 +1,12 @@
 // =======================================
-// SUPABASE
+// CONFIGURACION SUPABASE
 // =======================================
 
 const supabaseUrl =
-"https://rzcxkkztzvokiroxofjg.supabase.co/rest/v1/";
+"https://rzcxkkztzvokiroxofjg.supabase.co";
 
 const supabaseKey =
-"sb_publishable_DO65iz0TYgYZvNs0OssC4w_gcty9tri";
+"TU_SUPABASE_ANON_KEY";
 
 const supabase =
 window.supabase.createClient(
@@ -114,9 +114,7 @@ async function(e){
   const { error } =
   await supabase
   .from("services")
-  .insert([
-    service
-  ]);
+  .insert([service]);
 
   if(error){
 
@@ -136,11 +134,11 @@ async function(e){
 
   form.reset();
 
-  clearPreviewSignature(
+  clearPreviewCanvas(
     "clientSignature"
   );
 
-  clearPreviewSignature(
+  clearPreviewCanvas(
     "providerSignature"
   );
 
@@ -149,7 +147,7 @@ async function(e){
 });
 
 // =======================================
-// RENDER TABLA
+// MOSTRAR TABLA
 // =======================================
 
 function renderTable(services){
@@ -305,7 +303,7 @@ async function editService(id){
 }
 
 // =======================================
-// MODAL FIRMA DIGITAL
+// FIRMAS DIGITALES
 // =======================================
 
 const signatureModal =
@@ -323,22 +321,34 @@ modalCanvas.getContext("2d");
 
 let currentTargetCanvas = null;
 
-let drawing = false;
+let isDrawing = false;
 
 // =======================================
-// AJUSTAR TAMAÑO REAL
+// AJUSTAR CANVAS
 // =======================================
 
 function resizeModalCanvas(){
+
+  const ratio =
+  window.devicePixelRatio || 1;
 
   const rect =
   modalCanvas.getBoundingClientRect();
 
   modalCanvas.width =
-  rect.width;
+  rect.width * ratio;
 
   modalCanvas.height =
-  rect.height;
+  rect.height * ratio;
+
+  modalCtx.setTransform(
+    ratio,
+    0,
+    0,
+    ratio,
+    0,
+    0
+  );
 
   modalCtx.lineWidth = 3;
 
@@ -375,7 +385,7 @@ function openSignatureModal(targetId){
 }
 
 // =======================================
-// CERRAR
+// CERRAR MODAL
 // =======================================
 
 function closeSignatureModal(){
@@ -387,7 +397,7 @@ function closeSignatureModal(){
 }
 
 // =======================================
-// LIMPIAR FIRMA
+// LIMPIAR MODAL
 // =======================================
 
 function clearModalSignature(){
@@ -402,10 +412,33 @@ function clearModalSignature(){
 }
 
 // =======================================
+// LIMPIAR PREVIEW
+// =======================================
+
+function clearPreviewCanvas(canvasId){
+
+  const canvas =
+  document.getElementById(canvasId);
+
+  const ctx =
+  canvas.getContext("2d");
+
+  ctx.clearRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+}
+
+// =======================================
 // GUARDAR FIRMA
 // =======================================
 
 function saveSignature(){
+
+  if(!currentTargetCanvas) return;
 
   const targetCtx =
   currentTargetCanvas.getContext("2d");
@@ -430,7 +463,7 @@ function saveSignature(){
 }
 
 // =======================================
-// OBTENER POSICION
+// POSICION
 // =======================================
 
 function getPosition(e){
@@ -438,43 +471,44 @@ function getPosition(e){
   const rect =
   modalCanvas.getBoundingClientRect();
 
-  let x;
-  let y;
+  let clientX;
+  let clientY;
 
-  if(
-    e.touches &&
-    e.touches.length > 0
-  ){
+  if(e.touches){
 
-    x =
-    e.touches[0].clientX -
-    rect.left;
+    clientX =
+    e.touches[0].clientX;
 
-    y =
-    e.touches[0].clientY -
-    rect.top;
+    clientY =
+    e.touches[0].clientY;
 
   }else{
 
-    x =
-    e.clientX - rect.left;
+    clientX =
+    e.clientX;
 
-    y =
-    e.clientY - rect.top;
+    clientY =
+    e.clientY;
 
   }
 
-  return { x, y };
+  return {
+
+    x: clientX - rect.left,
+
+    y: clientY - rect.top
+
+  };
 
 }
 
 // =======================================
-// EMPEZAR DIBUJO
+// INICIAR DIBUJO
 // =======================================
 
-function startDraw(e){
+function startDrawing(e){
 
-  drawing = true;
+  isDrawing = true;
 
   const pos =
   getPosition(e);
@@ -494,9 +528,9 @@ function startDraw(e){
 // DIBUJAR
 // =======================================
 
-function draw(e){
+function drawSignature(e){
 
-  if(!drawing) return;
+  if(!isDrawing) return;
 
   const pos =
   getPosition(e);
@@ -513,12 +547,12 @@ function draw(e){
 }
 
 // =======================================
-// TERMINAR
+// TERMINAR DIBUJO
 // =======================================
 
-function stopDraw(){
+function stopDrawing(){
 
-  drawing = false;
+  isDrawing = false;
 
   modalCtx.beginPath();
 
@@ -530,22 +564,22 @@ function stopDraw(){
 
 modalCanvas.addEventListener(
   "mousedown",
-  startDraw
+  startDrawing
 );
 
 modalCanvas.addEventListener(
   "mousemove",
-  draw
+  drawSignature
 );
 
 modalCanvas.addEventListener(
   "mouseup",
-  stopDraw
+  stopDrawing
 );
 
 modalCanvas.addEventListener(
   "mouseleave",
-  stopDraw
+  stopDrawing
 );
 
 // =======================================
@@ -554,24 +588,24 @@ modalCanvas.addEventListener(
 
 modalCanvas.addEventListener(
   "touchstart",
-  startDraw,
+  startDrawing,
   { passive:false }
 );
 
 modalCanvas.addEventListener(
   "touchmove",
-  draw,
+  drawSignature,
   { passive:false }
 );
 
 modalCanvas.addEventListener(
   "touchend",
-  stopDraw
+  stopDrawing
 );
 
 modalCanvas.addEventListener(
   "touchcancel",
-  stopDraw
+  stopDrawing
 );
 
 // =======================================
@@ -626,8 +660,6 @@ function generatePDF(){
     "description"
   ).value;
 
-  // HEADER
-
   doc.setFillColor(
     31,
     79,
@@ -659,12 +691,10 @@ function generatePDF(){
   doc.setFontSize(12);
 
   doc.text(
-    "Reporte Tecnico de Servicio",
+    "Reporte Técnico de Servicio",
     15,
     28
   );
-
-  // TITULO
 
   doc.setTextColor(
     0,
@@ -680,13 +710,11 @@ function generatePDF(){
     50
   );
 
-  // TABLA
-
   const tableData = [
 
     ["Cliente", client],
 
-    ["Direccion", address],
+    ["Dirección", address],
 
     ["Fecha", date],
 
@@ -698,7 +726,7 @@ function generatePDF(){
 
     ["Tipo Servicio", type],
 
-    ["Descripcion", description]
+    ["Descripción", description]
 
   ];
 
@@ -708,112 +736,12 @@ function generatePDF(){
 
     head:[[
       "Campo",
-      "Informacion"
+      "Información"
     ]],
 
-    body:tableData,
-
-    styles:{
-      fontSize:11
-    },
-
-    headStyles:{
-      fillColor:[31,79,168]
-    }
+    body:tableData
 
   });
-
-  // FIRMAS
-
-  const clientCanvas =
-  document.getElementById(
-    "clientSignature"
-  );
-
-  const providerCanvas =
-  document.getElementById(
-    "providerSignature"
-  );
-
-  const clientImage =
-  clientCanvas.toDataURL(
-    "image/png"
-  );
-
-  const providerImage =
-  providerCanvas.toDataURL(
-    "image/png"
-  );
-
-  const finalY =
-  doc.lastAutoTable.finalY + 30;
-
-  doc.text(
-    "Firma Cliente",
-    25,
-    finalY
-  );
-
-  doc.text(
-    "Firma Tecnico",
-    125,
-    finalY
-  );
-
-  doc.addImage(
-    clientImage,
-    "PNG",
-    15,
-    finalY + 5,
-    80,
-    40
-  );
-
-  doc.addImage(
-    providerImage,
-    "PNG",
-    115,
-    finalY + 5,
-    80,
-    40
-  );
-
-  doc.line(
-    15,
-    finalY + 48,
-    95,
-    finalY + 48
-  );
-
-  doc.line(
-    115,
-    finalY + 48,
-    195,
-    finalY + 48
-  );
-
-  // PIE
-
-  const currentDate =
-  new Date().toLocaleString();
-
-  doc.setFontSize(10);
-
-  doc.setTextColor(120);
-
-  doc.text(
-    "Documento generado automaticamente",
-    14,
-    285
-  );
-
-  doc.text(
-    `Fecha: ${currentDate}`,
-    14,
-    291
-  );
-
-  // DESCARGA
 
   doc.save(
     `Servicio_${client}_${ticket}.pdf`
